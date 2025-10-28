@@ -22,43 +22,21 @@ def encryptage(valeur):
                                                                                                                                                      
 if _name_ == "_main_":
   app.run(debug=True)
-def encrypt():
+@app.route('/decrypt/<string:token>')
+def decryptage(token):
     """
-    Chiffre un texte en utilisant la clé fournie par l'utilisateur.
+    Inverse de la route encrypt.
+    URL attendue : /decrypt/<le_token_recu>
+    Retourne la valeur décryptée ou un message d'erreur si la clé/token sont invalides.
     """
-    data = request.json
-    text = data.get('text')
-    user_key = data.get('key')
-
-    if not text or not user_key:
-        return jsonify({'error': 'Veuillez fournir un texte et une clé.'}), 400
-
     try:
-        key = generate_key_from_user_input(user_key)
-        cipher = Fernet(key)
-        encrypted_text = cipher.encrypt(text.encode())
-        return jsonify({'encrypted_text': encrypted_text.decode()})
-    except Exception as e:
-        return jsonify({'error': 'Erreur lors du chiffrement', 'details': str(e)}), 500
-
-@app.route('/decrypt/', methods=['POST'])
-def decrypt():
-    """
-    Déchiffre un texte chiffré en utilisant la clé fournie par l'utilisateur.
-    """
-    data = request.json
-    encrypted_text = data.get('encrypted_text')
-    user_key = data.get('key')
-
-    if not encrypted_text or not user_key:
-        return jsonify({'error': 'Veuillez fournir un texte chiffré et une clé.'}), 400
-
-    try:
-        key = generate_key_from_user_input(user_key)
-        cipher = Fernet(key)
-        decrypted_text = cipher.decrypt(encrypted_text.encode()).decode()
-        return jsonify({'decrypted_text': decrypted_text})
+        token_bytes = token.encode()            # token (str) -> bytes
+        plaintext_bytes = f.decrypt(token_bytes)  # déchiffre (lève InvalidToken si échec)
+        return f"Valeur decryptée : {plaintext_bytes.decode()}"
     except InvalidToken:
-        return jsonify({'error': 'Clé incorrecte ou texte invalide.'}), 400
+        return "Erreur : token invalide ou clé incorrecte.", 400
     except Exception as e:
-        return jsonify({'error': 'Erreur lors du décryptage', 'details': str(e)}), 500
+        return f"Erreur serveur lors du décryptage : {str(e)}", 500
+
+if _name_ == "_main_":
+    app.run(debug=True)
