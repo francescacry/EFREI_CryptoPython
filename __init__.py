@@ -1,27 +1,27 @@
 from cryptography.fernet import Fernet
 from flask import Flask, render_template_string, render_template, jsonify
-from flask import Flask, request, jsonify
-from cryptography.fernet import Fernet, InvalidToken
-import base64
-
-app = Flask(__name__)
-
-def generate_key_from_user_input(user_key: str):
-    """
-    Transforme la clé saisie par l'utilisateur en une clé compatible avec Fernet.
-    """
-    key = user_key.encode('utf-8')
-    key = key.ljust(32, b'0')[:32]  # ajuste à 32 octets
-    return base64.urlsafe_b64encode(key)
-
+from flask import render_template
+from flask import json
+from urllib.request import urlopen
+import sqlite3
+                                                                                                                                       
+app = Flask(_name_)                                                                                                                  
+                                                                                                                                       
 @app.route('/')
-def home():
-    return jsonify({
-        "message": "Bienvenue sur l’API CryptoPython !",
-        "routes_disponibles": ["/encrypt/", "/decrypt/"]
-    })
+def hello_world():
+    return render_template('hello.html') #Comm2
 
-@app.route('/encrypt/', methods=['POST'])
+key = Fernet.generate_key()
+f = Fernet(key)
+
+@app.route('/encrypt/<string:valeur>')
+def encryptage(valeur):
+    valeur_bytes = valeur.encode()  # Conversion str -> bytes
+    token = f.encrypt(valeur_bytes)  # Encrypt la valeur
+    return f"Valeur encryptée : {token.decode()}"  # Retourne le token en str
+                                                                                                                                                     
+if _name_ == "_main_":
+  app.run(debug=True)
 def encrypt():
     """
     Chiffre un texte en utilisant la clé fournie par l'utilisateur.
